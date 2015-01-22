@@ -1,0 +1,306 @@
+<html>
+	<head>
+		<title>Ulam</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #ffffff;
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				position: absolute;
+				top: 0px;
+				width: 100%;
+				padding: 5px;
+				font-family: Monospace;
+				font-size: 13px;
+				text-align: center;
+				font-weight: bold;
+			}
+			a {
+				color: #fff;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="container"></div>
+		<div id="info">
+			<p>Ulam</p>
+			<button id="am">Add More!</button>
+		</div>
+
+
+		<script src="./three.min.js"></script>
+
+
+		<script>
+
+
+			var renderer, scene, camera, stats;
+
+			var particles, attributes;
+
+			var PARTICLE_SIZE = 20;
+
+			var raycaster, intersects;
+			var mouse, INTERSECTED;
+
+			var sep = 10;
+
+			init();
+			animate();
+			document.getElementById('am').onclick = addUlam
+
+			function init() {
+
+				container = document.getElementById( 'container' );
+
+				scene = new THREE.Scene();
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 250;
+
+				//
+
+				attributes = {
+
+					size:        { type: 'f', value: [] },
+					customColor: { type: 'c', value: [] }
+
+				};
+
+				shaderMaterial = new THREE.PointCloudMaterial({
+					vertexColors: THREE.VertexColors,
+				});
+
+				var geometry = new THREE.BoxGeometry( 200, 200, 0, 2, 2, 0 );
+
+				particles = new THREE.PointCloud( geometry, shaderMaterial );
+
+				var values_size = attributes.size.value;
+				var values_color = attributes.customColor.value;
+
+				var vertices = particles.geometry.vertices;
+
+				for( var v = 0,  vl = vertices.length; v < vl; v++ ) {
+
+					values_size[ v ] = PARTICLE_SIZE * 0.5;
+
+					values_color[ v ] = new THREE.Color().setHSL( 0.01 + 0.1 * ( v / vl ), 1.0, 0.5 );
+
+				}
+
+//				scene.add( particles );
+
+
+				curr = new THREE.Vector3();
+
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				//
+
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2()
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				var addInt = setInterval(function(){
+
+					if(scene.children.length == 7)
+						return clearInterval(addInt);
+					addUlam()
+
+				}, 200)
+
+			}
+
+			function vectorStart(ring){//given a spiral #, this method returns the vector3 of the location where the next number starts - a value of 0 is the first
+				// ring+=1;//because 0 is the first
+				return new THREE.Vector3(parseInt(ring/2), parseInt(ring/2) - 1, 0);
+			}
+
+			function ring(n){//returns a boxgeometry ring based on the number - n of 0 returns the first ring, a 1x1
+				var primecolor = new THREE.Color().setHSL(0, 0.5, 0.5);
+				var dcolor = new THREE.Color().setHSL(0.5, 0.5, 0.5);
+				var size = 2*n;//length of ring
+				if(n==0){
+					x = new THREE.Geometry();
+					x.vertices.push(new THREE.Vector3());
+					x.colors = [new THREE.Color().setHSL(0.2, 0.5, 0.5)]
+					x.nums = [1]
+					return x;
+				}
+				var ringGeo = new THREE.Geometry();
+				var nums = [];
+				var min = -size * sep / 2;
+				var max = size * sep / 2;
+				//sep = 1;
+				for(var x = min; x <= max; x+=sep)
+					for(var y = max; y >= min; y-=sep){
+						if(Math.abs(x) == max || Math.abs(y) == max){//if it's on an edge
+							if((x == max && y != min) || (y == max))
+								ringGeo.vertices.unshift(new THREE.Vector3(x,y,0));	
+							else
+								ringGeo.vertices.push(new THREE.Vector3(x,y,0));
+							
+
+						}
+					}
+
+				ringGeo.colors = new Array(ringGeo.vertices.length);
+				var nums = generateRange(n);
+
+				for(var i = 0; i < nums.length; i++){
+					if(isPrime(nums[i])){
+						ringGeo.colors[i] = primecolor;
+						console.log(nums[i])
+					}
+					else
+						ringGeo.colors[i] = dcolor;
+					}
+				ringGeo.nums = nums;
+				return ringGeo;
+			}
+
+			/*
+			Following code taken from http://www.javascripter.net/faq/numberisprime.htm
+			*/
+			function isPrime(n) {
+			 if (isNaN(n) || !isFinite(n) || n%1 || n<2) return false; 
+			 if (n==leastFactor(n)) return true;
+			 return false;
+			}
+
+			function leastFactor(n){
+			 if (isNaN(n) || !isFinite(n)) return NaN;  
+			 if (n==0) return 0;  
+			 if (n%1 || n*n<2) return 1;
+			 if (n%2==0) return 2;  
+			 if (n%3==0) return 3;  
+			 if (n%5==0) return 5;  
+			 var m = Math.sqrt(n);
+			 for (var i=7;i<=m;i+=30) {
+			  if (n%i==0)      return i;
+			  if (n%(i+4)==0)  return i+4;
+			  if (n%(i+6)==0)  return i+6;
+			  if (n%(i+10)==0) return i+10;
+			  if (n%(i+12)==0) return i+12;
+			  if (n%(i+16)==0) return i+16;
+			  if (n%(i+22)==0) return i+22;
+			  if (n%(i+24)==0) return i+24;
+			 }
+			 return n;
+			}
+			/*Fin*/
+
+			function generateRange(n){//numbers from (2n-1)^2 to (2n+1)^2
+				if(n == 0)
+					return [1];
+
+				var r = new Array();
+
+				for(var i = Math.pow(2*n - 1, 2) + 1; i <= Math.pow(2*n + 1, 2); i++){
+					r.push(i);
+				}
+				return r;
+			}
+
+			function createUlam(d){//d is how many rings
+				scene.children = [];
+				for(var i = 0; i <= d; i++){
+					scene.add(ulam(d));
+
+				}
+
+			}
+
+			function addUlam(){
+				scene.add( ulam(scene.children.length));
+			}
+
+			function ulam(d){
+				return new THREE.PointCloud( ring(d), new THREE.PointCloudMaterial({
+						// vertexColors: THREE.VertexColors
+				        size: 5,
+				        transparent: true,
+						vertexColors: THREE.VertexColors
+					})
+				);
+			}
+
+			function onDocumentMouseMove( event ) {
+
+				event.preventDefault();
+
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				// particles.rotation.x += 0.0005;
+				// particles.rotation.y += 0.001;
+
+				raycaster.setFromCamera( mouse, camera );
+
+				for( var i = 0; i < scene.children.length; i++){
+					intersects = raycaster.intersectObject( scene.children[i] || particles );
+
+					if ( intersects.length > 0 ) {
+
+						if ( INTERSECTED != intersects[ 0 ].index ) {
+
+							attributes.size.value[ INTERSECTED ] = PARTICLE_SIZE;
+
+							INTERSECTED = intersects[ 0 ].index;
+
+							console.log(scene.children[i].geometry.nums[INTERSECTED])
+
+						}
+
+					} else if ( INTERSECTED !== null ) {
+
+						attributes.size.value[ INTERSECTED ] = PARTICLE_SIZE;
+						attributes.size.needsUpdate = true;
+						INTERSECTED = null;
+
+					}
+				}
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	</body>
+
+</html>
