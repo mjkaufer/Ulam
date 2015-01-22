@@ -48,7 +48,7 @@
 	<body>
 		<div id="container"></div>
 		<div id="info">
-			<p>Ulam</p>
+			<p id="key">Ulam</p>
 			<button id="am" class="btn">Add More!</button>
 		</div>
 
@@ -250,7 +250,7 @@
 			function ulam(d){
 				return new THREE.PointCloud( ring(d), new THREE.PointCloudMaterial({
 						// vertexColors: THREE.VertexColors
-				        size: 5,
+				        size: 8,
 				        transparent: true,
 						vertexColors: THREE.VertexColors
 					})
@@ -302,6 +302,7 @@
 							INTERSECTED = intersects[ 0 ].index;
 
 							console.log(scene.children[i].geometry.nums[INTERSECTED])
+							document.getElementById('key').innerHTML = scene.children[i].geometry.nums[INTERSECTED]
 
 						}
 
