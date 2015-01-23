@@ -49,7 +49,7 @@
 		<div id="container"></div>
 		<div id="info">
 			<div id="info2">
-				<p>Ulam Spiral in Three.JS, by <a href="http://github.com/mjkaufer">mjkaufer</a></p>	
+				<p><a href = "http://en.wikipedia.org/wiki/Ulam_spiral">Ulam Spiral</a> in Three.JS, by <a href="http://github.com/mjkaufer">mjkaufer</a></p>	
 				<p>Current number: <span id="key">1</span></p>
 				<p>Controls: Use mouse wheel to zoom in and out, arrow keys to move, and drag to shift the view</p>
 			</div>
@@ -87,7 +87,7 @@
 
 				scene = new THREE.Scene();
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 100000 );
 				camera.position.z = 250;
 
 				//
@@ -190,7 +190,7 @@
 				for(var i = 0; i < nums.length; i++){
 					if(isPrime(nums[i])){
 						ringGeo.colors[i] = primecolor;
-						console.log(nums[i])
+						//console.log(nums[i])
 					}
 					else
 						ringGeo.colors[i] = dcolor;
@@ -310,7 +310,7 @@
 
 							INTERSECTED = intersects[ 0 ].index;
 
-							console.log(scene.children[i].geometry.nums[INTERSECTED])
+							//console.log(scene.children[i].geometry.nums[INTERSECTED])
 							document.getElementById('key').innerHTML = scene.children[i].geometry.nums[INTERSECTED]
 
 						}
