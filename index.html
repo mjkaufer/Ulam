@@ -48,13 +48,18 @@
 	<body>
 		<div id="container"></div>
 		<div id="info">
-			<p id="key">Ulam</p>
+			<div id="info2">
+				<p>Ulam Spiral in Three.JS, by <a href="http://github.com/mjkaufer">mjkaufer</a></p>	
+				<p>Current number: <span id="key">1</span></p>
+				<p>Controls: Use mouse wheel to zoom in and out, arrow keys to move, and drag to shift the view</p>
+			</div>
 			<button id="am" class="btn">Add More!</button>
+			<button id="hi" class="btn">Toggle Info</button>
 		</div>
 
 
 		<script src="./three.min.js"></script>
-
+		<script src="./OrbitControls.js"></script>
 
 		<script>
 
@@ -73,7 +78,9 @@
 			init();
 			animate();
 			document.getElementById('am').onclick = addUlam
-
+			document.getElementById('hi').onclick = function(){
+				document.getElementById('info2').hidden = !document.getElementById('info2').hidden
+			}
 			function init() {
 
 				container = document.getElementById( 'container' );
@@ -84,7 +91,6 @@
 				camera.position.z = 250;
 
 				//
-
 				attributes = {
 
 					size:        { type: 'f', value: [] },
@@ -124,6 +130,8 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
+				cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
+				cameraControls.target.set( 0, 0, 0 );
 				//
 
 				raycaster = new THREE.Raycaster();
@@ -139,7 +147,7 @@
 						return clearInterval(addInt);
 					addUlam()
 
-				}, 200)
+				}, 100)
 
 			}
 
@@ -250,7 +258,7 @@
 			function ulam(d){
 				return new THREE.PointCloud( ring(d), new THREE.PointCloudMaterial({
 						// vertexColors: THREE.VertexColors
-				        size: 8,
+				        size: 15,
 				        transparent: true,
 						vertexColors: THREE.VertexColors
 					})
@@ -288,6 +296,7 @@
 				// particles.rotation.x += 0.0005;
 				// particles.rotation.y += 0.001;
 
+				cameraControls.update()
 				raycaster.setFromCamera( mouse, camera );
 
 				for( var i = 0; i < scene.children.length; i++){
